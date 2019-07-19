@@ -80,7 +80,8 @@ class TwoLayerNet(object):
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        X1 = np.maximum(0, X.dot(W1) + b1)
+        scores = X1.dot(W2) + b2
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -97,8 +98,15 @@ class TwoLayerNet(object):
         # classifier loss.                                                          #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        scores_max = np.max(scores, axis=1).reshape(-1, 1)
+        scores -= scores_max
+        scores = np.exp(scores)
+        p = scores / np.sum(scores, axis=1).reshape(-1, 1)
 
-        pass
+        loss = -np.sum(np.log(p[np.arange(N), y]))
+
+        loss /= N
+        loss += reg * (np.sum(W1 * W1) + np.sum(W2 * W2))
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -110,8 +118,14 @@ class TwoLayerNet(object):
         # grads['W1'] should store the gradient on W1, and be a matrix of same size #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        p[np.arange(N), y] -= 1
 
-        pass
+        grads['W2'] = X1.T.dot(p) / N + 2 * reg * W2
+        grads['b2'] = np.sum(p, axis=0) / N
+        temp = p.dot(W2.T)
+        temp[X1 == 0] = 0
+        grads['W1'] = X.T.dot(temp) / N + 2 * reg * W1
+        grads['b1'] = np.sum(temp, axis=0) / N
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -156,7 +170,9 @@ class TwoLayerNet(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
+            inds = np.random.choice(num_train, batch_size)
+            X_batch = X[inds, :]
+            y_batch = y[inds]
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -172,7 +188,8 @@ class TwoLayerNet(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
+            for param_name in grads:
+                self.params[param_name] -= learning_rate * grads[param_name]
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -218,7 +235,11 @@ class TwoLayerNet(object):
         ###########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        W1, b1 = self.params['W1'], self.params['b1']
+        W2, b2 = self.params['W2'], self.params['b2']
+
+        X1 = np.maximum(0, X.dot(W1) + b1)
+        y_pred = np.argmax(X1.dot(W2) + b2, axis=1)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
