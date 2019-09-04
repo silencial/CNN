@@ -1,4 +1,6 @@
 __pycache__/
 .DS_Store
 .ipynb_checkpoints/
-cifar-10-batches-py
+datasets/
+
+!datasets/*.sh
