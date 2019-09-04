@@ -36,7 +36,8 @@ def rnn_step_forward(x, prev_h, Wx, Wh, b):
     ##############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    next_h = np.tanh(prev_h.dot(Wh) + x.dot(Wx) + b)
+    cache = (x, prev_h, Wx, Wh, b, next_h)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ##############################################################################
@@ -69,7 +70,14 @@ def rnn_step_backward(dnext_h, cache):
     ##############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    x, prev_h, Wx, Wh, b, next_h = cache
+
+    dtanh = (1 - next_h * next_h) * dnext_h
+    dx = dtanh.dot(Wx.T)
+    dprev_h = dtanh.dot(Wh.T)
+    dWx = x.T.dot(dtanh)
+    dWh = prev_h.T.dot(dtanh)
+    db = np.sum(dtanh, axis=0)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ##############################################################################
@@ -118,9 +126,9 @@ def rnn_backward(dh, cache):
     Compute the backward pass for a vanilla RNN over an entire sequence of data.
 
     Inputs:
-    - dh: Upstream gradients of all hidden states, of shape (N, T, H). 
-    
-    NOTE: 'dh' contains the upstream gradients produced by the 
+    - dh: Upstream gradients of all hidden states, of shape (N, T, H).
+
+    NOTE: 'dh' contains the upstream gradients produced by the
     individual loss functions at each timestep, *not* the gradients
     being passed between timesteps (which you'll have to compute yourself
     by calling rnn_step_backward in a loop).
