@@ -1,6 +1,6 @@
 __pycache__/
 .DS_Store
 .ipynb_checkpoints/
-datasets/
 
-!datasets/*.sh
+**/datasets/*
+!**/datasets/*.sh
